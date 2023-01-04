@@ -214,11 +214,8 @@ jobs:
           name: Run migrations
           command: |
            cd backend
-           rm -rf node_modules
-           rm package-lock.json
-           npm cache clean --force
            npm install
-           npm run migrations
+           npm run migrations > migrations_dump.txt
       - run:
           name: Send migration results to kvdb
           command: |
