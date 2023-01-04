@@ -1,0 +1,25 @@
+- name: "Creates backend directory"
+  file:
+    path: ~/deployed-backend
+    state: directory
+
+- name: "Unarchive backend files to new backend dir"
+  unarchive:
+    src: artifact.tar.gz
+    dest: ~/deployed-backend
+
+- name: "Installing Node Dependencies"
+  shell: |
+    cd ~/deployed-backend
+    npm install
+
+- name: "Start app"
+  shell: |
+    cd ~/deployed-backend/dist
+    pm2 stop default
+    pm2 start main.js
+  register: execute
+
+- name: print message
+  debug:
+    msg: "{{ execute.stdout_lines }}"
