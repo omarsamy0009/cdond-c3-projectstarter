@@ -57,7 +57,7 @@ commands:
             then
              cd ~/project/backend
              npm install
-             npm run migration:revert
+             npm run migrations:revert
             fi
             
 jobs:
@@ -192,7 +192,7 @@ jobs:
     steps:
       - checkout
       - add_ssh_keys:
-          fingerprints: ["81:67:7a:7e:28:28:c3:4a:81:f6:c5:8b:08:3d:c3:15"]
+          fingerprints: ["aa:2b:60:16:9e:4d:50:60:7f:1d:1a:b3:56:9c:30:47"]
       - attach_workspace:
           at: ~/
       - run:
@@ -227,7 +227,7 @@ jobs:
       - run:
           name: Send migration results to kvdb
           command: |
-            if grep -q "has been executed successfully." ~/project/backend/migrations_dump.txt
+            if grep -q "No migrations are pending" ~/project/backend/migrations_dump.txt
             then
               curl https://kvdb.io/W1yAwkU4xRdhpW9QSkLVqH/migration_${CIRCLE_WORKFLOW_ID:0:7}  -d '1'
             fi
@@ -274,7 +274,7 @@ jobs:
       - install_awscli
       - install_node
       - add_ssh_keys:
-          fingerprints: ["81:67:7a:7e:28:28:c3:4a:81:f6:c5:8b:08:3d:c3:15"]
+          fingerprints: ["aa:2b:60:16:9e:4d:50:60:7f:1d:1a:b3:56:9c:30:47"]
       - attach_workspace:
           at: ~/
       - restore_cache:
@@ -312,16 +312,14 @@ jobs:
     steps:
       - checkout
       - install_awscli
+      - install_node
       - run:
-          name: Get backend url
+          name: Backend smoke test.
           command: |
             BACKEND_IP=$(aws ec2 describe-instances \
             --filters "Name=tag:Name,Values=backend-${CIRCLE_WORKFLOW_ID:0:7}" \
             --query 'Reservations[*].Instances[*].PublicIpAddress' \
             --output text)
-      - run:
-          name: Backend smoke test.
-          command: |
             export API_URL="http://${BACKEND_IP}:3030"
             echo "${API_URL}"
             if curl "${API_URL}/api/status" | grep "ok"
